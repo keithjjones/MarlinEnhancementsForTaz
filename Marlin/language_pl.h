@@ -2,7 +2,7 @@
  * Polish
  *
  * LCD Menu Messages
- * See also documentation/LCDLanguageFont.md
+ * See also https://github.com/MarlinFirmware/Marlin/wiki/LCD-Language
  *
  */
 #ifndef LANGUAGE_PL_H
@@ -20,6 +20,7 @@
 #define MSG_AUTOSTART                       "Autostart"
 #define MSG_DISABLE_STEPPERS                "Wylacz silniki"
 #define MSG_AUTO_HOME                       "Auto. poz. zerowa"
+#define MSG_LEVEL_BED_HOMING                "Homing"
 #define MSG_SET_HOME_OFFSETS                "Set home offsets"
 #define MSG_SET_ORIGIN                      "Ustaw punkt zero"
 #define MSG_PREHEAT_PLA                     "Rozgrzej PLA"
@@ -126,11 +127,11 @@
 
 
 #if ENABLED(DELTA_CALIBRATION_MENU)
-    #define MSG_DELTA_CALIBRATE             "Delta Calibration"
-    #define MSG_DELTA_CALIBRATE_X           "Calibrate X"
-    #define MSG_DELTA_CALIBRATE_Y           "Calibrate Y"
-    #define MSG_DELTA_CALIBRATE_Z           "Calibrate Z"
-    #define MSG_DELTA_CALIBRATE_CENTER      "Calibrate Center"
+  #define MSG_DELTA_CALIBRATE               "Delta Calibration"
+  #define MSG_DELTA_CALIBRATE_X             "Calibrate X"
+  #define MSG_DELTA_CALIBRATE_Y             "Calibrate Y"
+  #define MSG_DELTA_CALIBRATE_Z             "Calibrate Z"
+  #define MSG_DELTA_CALIBRATE_CENTER        "Calibrate Center"
 #endif // DELTA_CALIBRATION_MENU
 
 #endif // LANGUAGE_PL_H

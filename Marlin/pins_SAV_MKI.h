@@ -46,7 +46,7 @@
 #define TEMP_2_PIN         -1
 
 #if DISABLED(SDSUPPORT)
-   // these pins are defined in the SD library if building with SD support
+  // these pins are defined in the SD library if building with SD support
   #define SCK_PIN          9
   #define MISO_PIN         11
   #define MOSI_PIN         10
@@ -82,7 +82,6 @@
 #define SDPOWER            -1
 #define LED_PIN            -1
 #define PS_ON_PIN          -1
-#define ALARM_PIN          -1
 #define SD_DETECT_PIN      -1
 
 #define BEEPER_PIN         -1

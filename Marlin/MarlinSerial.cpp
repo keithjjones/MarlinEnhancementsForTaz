@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  
+
   Modified 23 November 2006 by David A. Mellis
   Modified 28 September 2010 by Mark Sproul
 */
@@ -24,7 +24,7 @@
 #include "MarlinSerial.h"
 
 #ifndef USBCON
-// this next line disables the entire HardwareSerial.cpp, 
+// this next line disables the entire HardwareSerial.cpp,
 // this is so I can support Attiny series and any other chip without a UART
 #if defined(UBRRH) || defined(UBRR0H) || defined(UBRR1H) || defined(UBRR2H) || defined(UBRR3H)
 
@@ -33,16 +33,19 @@
 #endif
 
 FORCE_INLINE void store_char(unsigned char c) {
-  int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
+  CRITICAL_SECTION_START;
+    uint8_t h = rx_buffer.head;
+    uint8_t i = (uint8_t)(h + 1)  & (RX_BUFFER_SIZE - 1);
 
-  // if we should be storing the received character into the location
-  // just before the tail (meaning that the head would advance to the
-  // current location of the tail), we're about to overflow the buffer
-  // and so we don't write the character or advance the head.
-  if (i != rx_buffer.tail) {
-    rx_buffer.buffer[rx_buffer.head] = c;
-    rx_buffer.head = i;
-  }
+    // if we should be storing the received character into the location
+    // just before the tail (meaning that the head would advance to the
+    // current location of the tail), we're about to overflow the buffer
+    // and so we don't write the character or advance the head.
+    if (i != rx_buffer.tail) {
+      rx_buffer.buffer[h] = c;
+      rx_buffer.head = i;
+    }
+  CRITICAL_SECTION_END;
 }
 
 
@@ -74,11 +77,12 @@ void MarlinSerial::begin(long baud) {
       useU2X = false;
     }
   #endif
-  
+
   if (useU2X) {
-    M_UCSRxA = BIT(M_U2Xx);
+    M_UCSRxA = _BV(M_U2Xx);
     baud_setting = (F_CPU / 4 / baud - 1) / 2;
-  } else {
+  }
+  else {
     M_UCSRxA = 0;
     baud_setting = (F_CPU / 8 / baud - 1) / 2;
   }
@@ -87,36 +91,45 @@ void MarlinSerial::begin(long baud) {
   M_UBRRxH = baud_setting >> 8;
   M_UBRRxL = baud_setting;
 
-  sbi(M_UCSRxB, M_RXENx);
-  sbi(M_UCSRxB, M_TXENx);
-  sbi(M_UCSRxB, M_RXCIEx);
+  SBI(M_UCSRxB, M_RXENx);
+  SBI(M_UCSRxB, M_TXENx);
+  SBI(M_UCSRxB, M_RXCIEx);
 }
 
 void MarlinSerial::end() {
-  cbi(M_UCSRxB, M_RXENx);
-  cbi(M_UCSRxB, M_TXENx);
-  cbi(M_UCSRxB, M_RXCIEx);  
+  CBI(M_UCSRxB, M_RXENx);
+  CBI(M_UCSRxB, M_TXENx);
+  CBI(M_UCSRxB, M_RXCIEx);
 }
 
 
 int MarlinSerial::peek(void) {
-  if (rx_buffer.head == rx_buffer.tail) {
-    return -1;
-  } else {
-    return rx_buffer.buffer[rx_buffer.tail];
+  int v;
+  CRITICAL_SECTION_START;
+  uint8_t t = rx_buffer.tail;
+  if (rx_buffer.head == t) {
+    v = -1;
   }
+  else {
+    v = rx_buffer.buffer[t];
+  }
+  CRITICAL_SECTION_END;
+  return v;
 }
 
 int MarlinSerial::read(void) {
-  // if the head isn't ahead of the tail, we don't have any characters
-  if (rx_buffer.head == rx_buffer.tail) {
-    return -1;
+  int v;
+  CRITICAL_SECTION_START;
+  uint8_t t = rx_buffer.tail;
+  if (rx_buffer.head == t) {
+    v = -1;
   }
   else {
-    unsigned char c = rx_buffer.buffer[rx_buffer.tail];
-    rx_buffer.tail = (unsigned int)(rx_buffer.tail + 1) % RX_BUFFER_SIZE;
-    return c;
+    v = rx_buffer.buffer[t];
+    rx_buffer.tail = (uint8_t)(t + 1) & (RX_BUFFER_SIZE - 1);
   }
+  CRITICAL_SECTION_END;
+  return v;
 }
 
 void MarlinSerial::flush() {
@@ -124,12 +137,10 @@ void MarlinSerial::flush() {
   // occurs after reading the value of rx_buffer_head but before writing
   // the value to rx_buffer_tail; the previous value of rx_buffer_head
   // may be written to rx_buffer_tail, making it appear as if the buffer
-  // don't reverse this or there may be problems if the RX interrupt
-  // occurs after reading the value of rx_buffer_head but before writing
-  // the value to rx_buffer_tail; the previous value of rx_buffer_head
-  // may be written to rx_buffer_tail, making it appear as if the buffer
   // were full, not empty.
-  rx_buffer.head = rx_buffer.tail;
+  CRITICAL_SECTION_START;
+    rx_buffer.head = rx_buffer.tail;
+  CRITICAL_SECTION_END;
 }
 
 
@@ -162,7 +173,8 @@ void MarlinSerial::print(long n, int base) {
       n = -n;
     }
     printNumber(n, 10);
-  } else {
+  }
+  else {
     printNumber(n, base);
   }
 }
@@ -178,10 +190,10 @@ void MarlinSerial::print(double n, int digits) {
 
 void MarlinSerial::println(void) {
   print('\r');
-  print('\n');  
+  print('\n');
 }
 
-void MarlinSerial::println(const String &s) {
+void MarlinSerial::println(const String& s) {
   print(s);
   println();
 }
@@ -229,13 +241,13 @@ void MarlinSerial::println(double n, int digits) {
 // Private Methods /////////////////////////////////////////////////////////////
 
 void MarlinSerial::printNumber(unsigned long n, uint8_t base) {
-  unsigned char buf[8 * sizeof(long)]; // Assumes 8-bit chars. 
+  unsigned char buf[8 * sizeof(long)]; // Assumes 8-bit chars.
   unsigned long i = 0;
 
   if (n == 0) {
     print('0');
     return;
-  } 
+  }
 
   while (n > 0) {
     buf[i++] = n % base;
@@ -243,23 +255,23 @@ void MarlinSerial::printNumber(unsigned long n, uint8_t base) {
   }
 
   for (; i > 0; i--)
-    print((char) (buf[i - 1] < 10 ?
-      '0' + buf[i - 1] :
-      'A' + buf[i - 1] - 10));
+    print((char)(buf[i - 1] < 10 ?
+                 '0' + buf[i - 1] :
+                 'A' + buf[i - 1] - 10));
 }
 
 void MarlinSerial::printFloat(double number, uint8_t digits) {
   // Handle negative numbers
   if (number < 0.0) {
-     print('-');
-     number = -number;
+    print('-');
+    number = -number;
   }
 
   // Round correctly so that print(1.999, 2) prints as "2.00"
   double rounding = 0.5;
   for (uint8_t i = 0; i < digits; ++i)
     rounding /= 10.0;
-  
+
   number += rounding;
 
   // Extract the integer part of the number and print it
@@ -275,8 +287,8 @@ void MarlinSerial::printFloat(double number, uint8_t digits) {
     remainder *= 10.0;
     int toPrint = int(remainder);
     print(toPrint);
-    remainder -= toPrint; 
-  } 
+    remainder -= toPrint;
+  }
 }
 // Preinstantiate Objects //////////////////////////////////////////////////////
 

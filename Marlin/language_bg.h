@@ -2,7 +2,7 @@
  * Bulgarian
  *
  * LCD Menu Messages
- * See also documentation/LCDLanguageFont.md
+ * See also https://github.com/MarlinFirmware/Marlin/wiki/LCD-Language
  *
  */
 #ifndef LANGUAGE_BG_H
@@ -20,6 +20,7 @@
 #define MSG_AUTOSTART                       "Автостарт"
 #define MSG_DISABLE_STEPPERS                "Изкл. двигатели"
 #define MSG_AUTO_HOME                       "Паркиране"
+#define MSG_LEVEL_BED_HOMING                "Homing"
 #define MSG_SET_HOME_OFFSETS                "Задай Начало"
 #define MSG_SET_ORIGIN                      "Изходна точка"
 #define MSG_PREHEAT_PLA                     "Подгряване PLA"
@@ -126,11 +127,11 @@
 #define MSG_END_MINUTE                      "минути"
 
 #if ENABLED(DELTA_CALIBRATION_MENU)
-    #define MSG_DELTA_CALIBRATE             "Делта Калибровка"
-    #define MSG_DELTA_CALIBRATE_X           "Калибровка X"
-    #define MSG_DELTA_CALIBRATE_Y           "Калибровка Y"
-    #define MSG_DELTA_CALIBRATE_Z           "Калибровка Z"
-    #define MSG_DELTA_CALIBRATE_CENTER      "Калибровка Център"
+  #define MSG_DELTA_CALIBRATE               "Делта Калибровка"
+  #define MSG_DELTA_CALIBRATE_X             "Калибровка X"
+  #define MSG_DELTA_CALIBRATE_Y             "Калибровка Y"
+  #define MSG_DELTA_CALIBRATE_Z             "Калибровка Z"
+  #define MSG_DELTA_CALIBRATE_CENTER        "Калибровка Център"
 #endif // DELTA_CALIBRATION_MENU
 
 #endif // LANGUAGE_BG_H

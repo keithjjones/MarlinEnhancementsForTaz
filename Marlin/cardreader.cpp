@@ -88,7 +88,7 @@ void CardReader::lsDive(const char *prepend, SdFile parent, const char * const m
       // close() is done automatically by destructor of SdFile
     }
     else {
-      char pn0 = p.name[0];
+      uint8_t pn0 = p.name[0];
       if (pn0 == DIR_NAME_FREE) break;
       if (pn0 == DIR_NAME_DELETED || pn0 == '.') continue;
       if (longFilename[0] == '.') continue;
@@ -195,11 +195,7 @@ void CardReader::initsd() {
   cardOK = false;
   if (root.isOpen()) root.close();
 
-  #if ENABLED(SDEXTRASLOW)
-    #define SPI_SPEED SPI_QUARTER_SPEED
-  #elif ENABLED(SDSLOW)
-    #define SPI_SPEED SPI_HALF_SPEED
-  #else
+  #ifndef SPI_SPEED
     #define SPI_SPEED SPI_FULL_SPEED
   #endif
 
@@ -247,10 +243,17 @@ void CardReader::release() {
   cardOK = false;
 }
 
+void CardReader::openAndPrintFile(const char *name) {
+  char cmd[4 + (FILENAME_LENGTH + 1) * MAX_DIR_DEPTH + 2]; // Room for "M23 ", names with slashes, a null, and one extra
+  sprintf_P(cmd, PSTR("M23 %s"), name);
+  for (char *c = &cmd[4]; *c; c++) *c = tolower(*c);
+  enqueue_and_echo_command_now(cmd);
+  enqueue_and_echo_commands_P(PSTR("M24"));
+}
+
 void CardReader::startFileprint() {
-  if (cardOK) {
+  if (cardOK)
     sdprinting = true;
-  }
 }
 
 void CardReader::pauseSDPrint() {
@@ -267,9 +270,9 @@ void CardReader::getAbsFilename(char *t) {
   *t = '/'; t++; cnt++;
   for (uint8_t i = 0; i < workDirDepth; i++) {
     workDirParents[i].getFilename(t); //SDBaseFile.getfilename!
-    while(*t && cnt < MAXPATHNAMELENGTH) { t++; cnt++; } //crawl counter forward.
+    while (*t && cnt < MAXPATHNAMELENGTH) { t++; cnt++; } //crawl counter forward.
   }
-  if (cnt < MAXPATHNAMELENGTH - FILENAME_LENGTH)
+  if (cnt < MAXPATHNAMELENGTH - (FILENAME_LENGTH))
     file.getFilename(t);
   else
     t[0] = 0;
@@ -279,34 +282,34 @@ void CardReader::openFile(char* name, bool read, bool replace_current/*=true*/) 
   if (!cardOK) return;
   if (file.isOpen()) { //replacing current file by new file, or subfile call
     if (!replace_current) {
-     if (file_subcall_ctr > SD_PROCEDURE_DEPTH - 1) {
-       SERIAL_ERROR_START;
-       SERIAL_ERRORPGM("trying to call sub-gcode files with too many levels. MAX level is:");
-       SERIAL_ERRORLN(SD_PROCEDURE_DEPTH);
-       kill(PSTR(MSG_KILLED));
-       return;
+      if (file_subcall_ctr > SD_PROCEDURE_DEPTH - 1) {
+        SERIAL_ERROR_START;
+        SERIAL_ERRORPGM("trying to call sub-gcode files with too many levels. MAX level is:");
+        SERIAL_ERRORLN(SD_PROCEDURE_DEPTH);
+        kill(PSTR(MSG_KILLED));
+        return;
+      }
+
+      SERIAL_ECHO_START;
+      SERIAL_ECHOPGM("SUBROUTINE CALL target:\"");
+      SERIAL_ECHO(name);
+      SERIAL_ECHOPGM("\" parent:\"");
+
+      //store current filename and position
+      getAbsFilename(filenames[file_subcall_ctr]);
+
+      SERIAL_ECHO(filenames[file_subcall_ctr]);
+      SERIAL_ECHOPGM("\" pos");
+      SERIAL_ECHOLN(sdpos);
+      filespos[file_subcall_ctr] = sdpos;
+      file_subcall_ctr++;
      }
-
-     SERIAL_ECHO_START;
-     SERIAL_ECHOPGM("SUBROUTINE CALL target:\"");
-     SERIAL_ECHO(name);
-     SERIAL_ECHOPGM("\" parent:\"");
-
-     //store current filename and position
-     getAbsFilename(filenames[file_subcall_ctr]);
-
-     SERIAL_ECHO(filenames[file_subcall_ctr]);
-     SERIAL_ECHOPGM("\" pos");
-     SERIAL_ECHOLN(sdpos);
-     filespos[file_subcall_ctr] = sdpos;
-     file_subcall_ctr++;
-    }
-    else {
-     SERIAL_ECHO_START;
-     SERIAL_ECHOPGM("Now doing file: ");
-     SERIAL_ECHOLN(name);
-    }
-    file.close();
+     else {
+      SERIAL_ECHO_START;
+      SERIAL_ECHOPGM("Now doing file: ");
+      SERIAL_ECHOLN(name);
+     }
+     file.close();
   }
   else { //opening fresh file
     file_subcall_ctr = 0; //resetting procedure depth in case user cancels print while in procedure
@@ -505,10 +508,7 @@ void CardReader::checkautostart(bool force) {
   while (root.readDir(p, NULL) > 0) {
     for (int8_t i = 0; i < (int8_t)strlen((char*)p.name); i++) p.name[i] = tolower(p.name[i]);
     if (p.name[9] != '~' && strncmp((char*)p.name, autoname, 5) == 0) {
-      char cmd[4 + (FILENAME_LENGTH + 1) * MAX_DIR_DEPTH + 2];
-      sprintf_P(cmd, PSTR("M23 %s"), autoname);
-      enqueuecommand(cmd);
-      enqueuecommands_P(PSTR("M24"));
+      openAndPrintFile(autoname);
       found = true;
     }
   }
@@ -594,7 +594,7 @@ void CardReader::printingHasFinished() {
     sdprinting = false;
     if (SD_FINISHED_STEPPERRELEASE) {
       //finishAndDisableSteppers();
-      enqueuecommands_P(PSTR(SD_FINISHED_RELEASECOMMAND));
+      enqueue_and_echo_commands_P(PSTR(SD_FINISHED_RELEASECOMMAND));
     }
     autotempShutdown();
   }

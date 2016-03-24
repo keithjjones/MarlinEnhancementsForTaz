@@ -12,7 +12,7 @@
 #define SERVO0_PIN 22 // Motor header MX1
 #define SERVO1_PIN 23 // Motor header MX2
 #define SERVO2_PIN 24 // Motor header MX3
-#define SERVO2_PIN  5 // PWM header pin 5
+#define SERVO3_PIN  5 // PWM header pin 5
 
 #if ENABLED(Z_PROBE_SLED)
   #define SLED_PIN         -1
@@ -28,7 +28,7 @@
 #undef E0_MS2_PIN
 #undef E1_MS1_PIN
 #undef E1_MS2_PIN
- 
+
 #define X_STEP_PIN 37
 #define X_DIR_PIN 48
 #define X_MIN_PIN 12
@@ -82,14 +82,13 @@
 #define E1_MS1_PIN 63
 #define E1_MS2_PIN 64
 
-#undef DIGIPOTSS_PIN
 #define DIGIPOTSS_PIN 38
 #define DIGIPOT_CHANNELS {4,5,3,0,1} // X Y Z E0 E1 digipot channels to stepper driver mapping
 
 #define SDPOWER            -1
 #define SDSS               53
 #define LED_PIN            13
-#define FAN_PIN            8  
+#define FAN_PIN            8
 #define FAN1_PIN           6  //Fan1 --- Extruer0 Fan
 #define FAN2_PIN           2  //Fan2 --- Case Fan
 
@@ -163,26 +162,26 @@
 #endif // ULTRA_LCD
 
 #if ENABLED(VIKI2) || ENABLED(miniVIKI)
- #define BEEPER_PIN 44
- // Pins for DOGM SPI LCD Support
- #define DOGLCD_A0  70 
- #define DOGLCD_CS  71 
- #define LCD_SCREEN_ROT_180
-  
- //The encoder and click button 
- #define BTN_EN1 85 
- #define BTN_EN2 84
- #define BTN_ENC 83  //the click switch
+  #define BEEPER_PIN 44
+  // Pins for DOGM SPI LCD Support
+  #define DOGLCD_A0  70
+  #define DOGLCD_CS  71
+  #define LCD_SCREEN_ROT_180
 
- #define SD_DETECT_PIN -1 // Pin 72 if using easy adapter board   
+  //The encoder and click button
+  #define BTN_EN1 85
+  #define BTN_EN2 84
+  #define BTN_ENC 83  //the click switch
+
+  #define SD_DETECT_PIN -1 // Pin 72 if using easy adapter board
 
   #if ENABLED(TEMP_STAT_LEDS)
-   #define STAT_LED_RED      22
-   #define STAT_LED_BLUE     32 
+    #define STAT_LED_RED      22
+    #define STAT_LED_BLUE     32
   #endif
 #endif // VIKI2/miniVIKI
 
 #if ENABLED(FILAMENT_SENSOR)
-  //Filip added pin for Filament sensor analog input 
+  //Filip added pin for Filament sensor analog input
   #define FILWIDTH_PIN        3
 #endif

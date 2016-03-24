@@ -2,7 +2,7 @@
  * German
  *
  * LCD Menu Messages
- * See also documentation/LCDLanguageFont.md
+ * See also https://github.com/MarlinFirmware/Marlin/wiki/LCD-Language
  *
  */
 #ifndef LANGUAGE_DE_H
@@ -20,6 +20,7 @@
 #define MSG_AUTOSTART                       "Autostart"
 #define MSG_DISABLE_STEPPERS                "Motoren Aus" // M84
 #define MSG_AUTO_HOME                       "Home" // G28
+#define MSG_LEVEL_BED_HOMING                "Homing"
 #define MSG_SET_HOME_OFFSETS                "Setze Home hier"
 #define MSG_SET_ORIGIN                      "Setze Null hier" //"G92 X0 Y0 Z0" commented out in ultralcd.cpp
 #define MSG_PREHEAT_PLA                     "Vorwärmen PLA"
@@ -27,11 +28,6 @@
 #define MSG_PREHEAT_PLA_ALL                 "Vorw. PLA Alle"
 #define MSG_PREHEAT_PLA_BEDONLY             "Vorw. PLA Bett"
 #define MSG_PREHEAT_PLA_SETTINGS            "Vorwärm. PLA Ein."
-#define MSG_PREHEAT_PETG                    "Vorwärmen PETG"
-#define MSG_PREHEAT_PETG_N                  "Vorwärmen PETG "
-#define MSG_PREHEAT_PETG_ALL                "Vorw. PETG Alle"
-#define MSG_PREHEAT_PETG_BEDONLY            "Vorw. PETG Bett"
-#define MSG_PREHEAT_PETG_SETTINGS           "Vorwärm. PETG Ein."
 #define MSG_PREHEAT_ABS                     "Vorwärmen ABS"
 #define MSG_PREHEAT_ABS_N                   "Vorwärmen ABS "
 #define MSG_PREHEAT_ABS_ALL                 "Vorw. ABS Alle"
@@ -133,11 +129,11 @@
 #define MSG_BED_DONE                        "Bett aufgeheizt"
 
 #if ENABLED(DELTA_CALIBRATION_MENU)
-    #define MSG_DELTA_CALIBRATE             "Delta kalibrieren"
-    #define MSG_DELTA_CALIBRATE_X           "Kalibriere X"
-    #define MSG_DELTA_CALIBRATE_Y           "Kalibriere Y"
-    #define MSG_DELTA_CALIBRATE_Z           "Kalibriere Z"
-    #define MSG_DELTA_CALIBRATE_CENTER      "Kalibriere Mitte"
+  #define MSG_DELTA_CALIBRATE               "Delta kalibrieren"
+  #define MSG_DELTA_CALIBRATE_X             "Kalibriere X"
+  #define MSG_DELTA_CALIBRATE_Y             "Kalibriere Y"
+  #define MSG_DELTA_CALIBRATE_Z             "Kalibriere Z"
+  #define MSG_DELTA_CALIBRATE_CENTER        "Kalibriere Mitte"
 #endif // DELTA_CALIBRATION_MENU
 
 #endif // LANGUAGE_DE_H

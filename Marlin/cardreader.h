@@ -23,6 +23,7 @@ public:
   void removeFile(char* name);
   void closefile(bool store_location=false);
   void release();
+  void openAndPrintFile(const char *name);
   void startFileprint();
   void pauseSDPrint();
   void getStatus();
@@ -38,7 +39,7 @@ public:
   void getAbsFilename(char *t);
 
   void ls();
-  void chdir(const char * relpath);
+  void chdir(const char *relpath);
   void updir();
   void setroot();
 

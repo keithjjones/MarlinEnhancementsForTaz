@@ -60,12 +60,17 @@
 
 // Say which 16 bit timers can be used and in what order
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  #define _useTimer5
   //#define _useTimer1
   #define _useTimer3
   #define _useTimer4
-  //typedef enum { _timer5, _timer1, _timer3, _timer4, _Nbr_16timers } timer16_Sequence_t ;
-  typedef enum { _timer5, _timer3, _timer4, _Nbr_16timers } timer16_Sequence_t ;
+  #ifndef MOTOR_CURRENT_PWM_XY_PIN
+    //Timer 5 is used for motor current PWM and can't be used for servos.
+    #define _useTimer5
+    //typedef enum { _timer5, _timer1, _timer3, _timer4, _Nbr_16timers } timer16_Sequence_t ;
+    typedef enum { _timer5, _timer3, _timer4, _Nbr_16timers } timer16_Sequence_t ;
+  #else
+    typedef enum {_timer3, _timer4, _Nbr_16timers } timer16_Sequence_t ;
+  #endif
 
 #elif defined(__AVR_ATmega32U4__)
   //#define _useTimer1
@@ -105,8 +110,8 @@
 #define INVALID_SERVO         255     // flag indicating an invalid servo index
 
 typedef struct {
-  uint8_t nbr        :6 ;             // a pin number from 0 to 63
-  uint8_t isActive   :1 ;             // true if this channel is enabled, pin not pulsed if false
+  uint8_t nbr        : 6 ;            // a pin number from 0 to 63
+  uint8_t isActive   : 1 ;            // true if this channel is enabled, pin not pulsed if false
 } ServoPin_t;
 
 typedef struct {
